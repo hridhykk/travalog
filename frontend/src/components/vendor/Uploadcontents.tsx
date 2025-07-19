@@ -3,6 +3,8 @@ import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
+
 
 interface TravelPackageFormData {
   packageName: string;
@@ -21,10 +23,15 @@ interface TravelPackageFormData {
 }
 
 const TravelPackageForm: React.FC = () => {
+
+  type Base64Image = string;
+
+const [base64Images, setBase64Images] = useState<Base64Image[]>([]);
   const vendorId = useSelector((state: RootState) => state.vendor.vendor?._id);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+const [imageURLs, setImageURLs] = useState<string[]>([]); 
 
   const {
     control,
@@ -67,19 +74,19 @@ const TravelPackageForm: React.FC = () => {
   ];
 
   // Handle image upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const fileArray = Array.from(files);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (!files) return;
 
-      // Limit to 3 files
-      const newFiles = [...images, ...fileArray].slice(0, 3);
+  const uploads = Array.from(files).map((file) => uploadToCloudinary(file));
 
-      setImages(newFiles);
-      setImagePreviews(newFiles.map((file) => URL.createObjectURL(file)));
-    }
-  };
-
+  try {
+    const results = await Promise.all(uploads); // all image URLs from Cloudinary
+    setImageURLs((prev) => [...prev, ...results]);
+  } catch (err) {
+    console.error("Image upload error:", err);
+  }
+};
   // Delete an image
   const handleImageDelete = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index);
@@ -103,46 +110,33 @@ const TravelPackageForm: React.FC = () => {
 
   // Form submission
   const onSubmit = async (data: TravelPackageFormData) => {
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const formData = new FormData();
+  try {
+    const payload = {
+      ...data,
+      vendorId,
+      price: parseFloat(data.price),
+      images: imageURLs, // ← SEND only URLs!
+    };
 
-      formData.append(
-        'packageData',
-        JSON.stringify({
-          ...data,
-          price: parseFloat(data.price),
-          duration: data.duration,
-          vendorId,
-        })
-      );
+    const response = await axios.post('http://localhost:5000/vendor/registerPackage', payload);
 
-      // Append images
-      images.forEach((file, index) => {
-        formData.append(`image${index + 1}`, file);
-      });
-
-      const response = await axios.post('http://localhost:5000/vendor/registerPackage', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      if (response.data.status === 'success') {
-        alert('Package uploaded successfully!');
-        reset();
-        setImages([]);
-        setImagePreviews([]);
-      } else {
-        throw new Error(response.data.message || 'Upload failed');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Failed to upload package');
-    } finally {
-      setLoading(false);
+    if (response.data.status === 'success') {
+      alert('Package uploaded successfully!');
+      reset();
+      setImageURLs([]);
+    } else {
+      throw new Error(response.data.message || 'Upload failed');
     }
-  };
+  } catch (error) {
+    console.error('Upload error:', error);
+    alert('Failed to upload package');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-md">

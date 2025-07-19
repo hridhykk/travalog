@@ -5,6 +5,7 @@ import { IPackage } from "../../../domain/entities/packageentities";
 import path from 'path';
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import cloudinary from "../../../utils/cloudinary";
 
 export class VendorPackageController {
   private registerPackageUseCase: RegisterPackageUseCase;
@@ -26,112 +27,89 @@ private updatePackageUseCase:UpdatePackageUseCase
     this.deletePackageUseCase  = new DeletePackageUseCase (packageRepository)
   this.updatePackageUseCase = new UpdatePackageUseCase(packageRepository)
   }
-  registerPackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      // console.log('Incoming Request Body:', req.body);
-      // console.log('Incoming Files:', req.files);
 
-      // Parse package data
-      const parsedData = JSON.parse(req.body.packageData);
 
-      // Construct the package data object
-      const packageData: IPackage = {
-        vendorId: parsedData.vendorId,
-        packageName: parsedData.packageName,
-        companyName: parsedData.companyName,
-        venue: parsedData.venue,
-        price: parseFloat(parsedData.price),
-        duration: parsedData.duration,
-        inclusion: parsedData.inclusion || [],
-        exclusion: parsedData.exclusion || [],
-        packageDescription: parsedData.packageDescription,
-        dayDescriptions: parsedData.dayDescriptions || [],
-       // Include bookedDates from parsed data if available
-       // Include additionalSlots from parsed data if available
-        maxPersons: parseInt(parsedData.maxPersons),
-        minPersons: parseInt(parsedData.minPersons),
-        maxDuration:parseInt(parsedData.maxDuration),
-        PackageType:parsedData.PackageType,
-        isBlocked: false, // Initially not blocked
-        isVerified: false, // Initially not verified
-        images: [
-          ...(req.files as any)?.image1?.map((file: any) => path.basename(file.key)) || [],
-          ...(req.files as any)?.image2?.map((file: any) => path.basename(file.key)) || [],
-          ...(req.files as any)?.image3?.map((file: any) => path.basename(file.key)) || [],
-        ],
-    
-        maxPackagesPerDay: parsedData.maxPackagesPerDay || 1, // Default to 1 package per day if not provided
-      };
 
-      // Call the use case to register the package
-      const result = await this.registerPackageUseCase.execute(packageData);
 
-      if (result.status === 'success') {
-        res.status(201).json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error) {
-      console.error('Package Registration Error:', error);
-      res.status(500).json({
-        status: 'error',
-        message: 'Internal server error',
-      });
+ registerPackage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsedData = req.body;
+    const uploadedImageUrls: string[] = parsedData.images || [];
+
+
+    const packageData: IPackage = {
+      vendorId: parsedData.vendorId,
+      packageName: parsedData.packageName,
+      companyName: parsedData.companyName,
+      venue: parsedData.venue,
+      price: parseFloat(parsedData.price),
+      duration: parsedData.duration,
+      inclusion: parsedData.inclusion || [],
+      exclusion: parsedData.exclusion || [],
+      packageDescription: parsedData.packageDescription,
+      dayDescriptions: parsedData.dayDescriptions || [],
+      maxPersons: parseInt(parsedData.maxPersons),
+      minPersons: parseInt(parsedData.minPersons),
+      maxDuration: parseInt(parsedData.maxDuration),
+      PackageType: parsedData.PackageType,
+      maxPackagesPerDay: parsedData.maxPackagesPerDay || 1,
+      isBlocked: false,
+      isVerified: false,
+      images: uploadedImageUrls,
+    };
+
+    const result = await this.registerPackageUseCase.execute(packageData);
+
+    if (result.status === 'success') {
+      res.status(201).json(result);
+    } else {
+      res.status(400).json(result);
     }
-  };
+  } catch (error) {
+    console.error('Package Registration Error:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+};
 
-  fetchPackagesWithPagination = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const vendorId = req.query.vendorId as string;
-      const page = parseInt(req.query.page as string, 10) || 1;
-      const limit = parseInt(req.query.limit as string, 10) || 10;
-  
-      if (!vendorId) {
-        res.status(400).json({ status: 'error', message: 'vendorId is required' });
-        return;
-      }
-  
-      const result = await this.fetchPackageUsecase.execute(vendorId, page, limit);
-      const data = result.data;
-      const totalCount = result.totalCount ?? 0; // Ensure totalCount is always defined
-  
-      const s3Client = new S3Client({ region: process.env.AWS_REGION });
-  
-      for (const pkg of data) {
-        pkg.images = await Promise.all(
-          pkg.images.map(async (imageKey: string) => {
-            if (imageKey) {
-              const command = new GetObjectCommand({
-                Bucket: process.env.S3_BUCKET_NAME!,
-                Key: `travalog/vendor/uploadimages/${imageKey}`,
-              });
-              return getSignedUrl(s3Client, command, { expiresIn: 3600 });
-            }
-            return null;
-          })
-        );
-      }
-  
-      const totalPages = Math.ceil(totalCount / limit);
-  console.log('this is the data from the pagination data',data)
-      res.status(200).json({
-        status: 'success',
-        message: 'Packages fetched successfully',
-        data,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalCount,
-          limit,
-        },
-      });
-    } catch (error) {
-      console.error('Error fetching packages:', error);
-      res.status(500).json({ status: 'error', message: 'Internal server error' });
+
+
+
+fetchPackagesWithPagination = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const vendorId = req.query.vendorId as string;
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+
+    if (!vendorId) {
+      res.status(400).json({ status: 'error', message: 'vendorId is required' });
+      return;
     }
-  };
+
+    const result = await this.fetchPackageUsecase.execute(vendorId, page, limit);
+    const data = result.data;
+    const totalCount = result.totalCount ?? 0;
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Packages fetched successfully',
+      data, // Images already include usable Cloudinary URLs
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching packages:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+};
   
-  
+
+
   updateSlot =async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
  try{
 
@@ -165,22 +143,7 @@ console.log(req.body)
 
    const packages = result.data;
 
-      const s3Client = new S3Client({ region: process.env.AWS_REGION });
-
-      for (const pkg of packages) {
-        pkg.images = await Promise.all(
-          pkg.images.map(async (imageKey: string) => {
-            if (imageKey) {
-              const command = new GetObjectCommand({
-                Bucket: process.env.S3_BUCKET_NAME!,
-                Key: `travalog/vendor/uploadimages/${imageKey}`,  // Make sure Key includes the correct path
-              });
-              return getSignedUrl(s3Client, command, { expiresIn: 3600 });
-            }
-            return null;
-          })
-        );
-      }
+      
    res.status(result?.status === 'success' ? 200 : 401).json({ 
     status: result?.status,
     message: result?.message,
@@ -192,6 +155,8 @@ console.log(req.body)
       res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
   }
+
+
 
   fetchpackage=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
    try{

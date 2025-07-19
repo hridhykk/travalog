@@ -135,15 +135,27 @@ const PopularTrips: React.FC = () => {
               >
                   {/* Display two images and toggle between them */}
                   <div className="relative">
-                    {trip.images && trip.images.length > 1 ? (
-                      <ImageToggle images={trip.images} />
-                    ) : (
-                      <img
-                        src={trip.images[0]}
-                        alt={trip.venue}
-                        className="h-56 w-full object-cover"
-                      />
-                    )}
+                {trip.images && trip.images.length > 1 ? (
+  <ImageToggle images={trip.images} />
+) : trip.images && trip.images.length === 1 && trip.images[0] ? (
+  <img
+    src={
+      trip.images[0].includes("/uploadimages/")
+        ? decodeURIComponent(trip.images[0].split("/uploadimages/")[1])
+        : trip.images[0]
+    }
+    alt={trip.venue}
+    className="h-56 w-full object-cover"
+    onError={(e) => {
+      e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
+    }}
+  />
+) : (
+  <div className="h-56 w-full bg-gray-300 flex justify-center items-center">
+    <span className="text-white text-xl">No Image</span>
+  </div>
+)}
+
                   </div>
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-2 text-gray-900">{trip.venue}</h3>
