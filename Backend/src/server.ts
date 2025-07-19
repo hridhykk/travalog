@@ -1,3 +1,6 @@
+
+import dotenv from 'dotenv';
+dotenv.config();
 import express, { Express } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -8,10 +11,10 @@ import adminRoutes from './presentation/routes/adminRoute';
 import { Request,Response } from "express";
 import vendorRoutes from './presentation/routes/vendorRoutes'
 import  session  from 'express-session';
-import dotenv from 'dotenv';
+
 import './infrastructure/cron/releaseBookingPayments';
 
-dotenv.config();
+
 
 const app: Express = express();
 
