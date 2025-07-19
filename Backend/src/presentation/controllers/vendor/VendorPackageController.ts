@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { RegisterPackageUseCase, FetchPackageUseCase,UpdateSlotUseCase,FetchAllPackagesUseCase,FetchPackageDetailsUseCase, CheckavailabilityUseCase ,DeletePackageUseCase,UpdatePackageUseCase  } from '../../../application/use-case/vendor/vendorPackage';
+import { RegisterPackageUseCase, FetchPackageUseCase, UpdateSlotUseCase, FetchAllPackagesUseCase, FetchPackageDetailsUseCase, CheckavailabilityUseCase, DeletePackageUseCase, UpdatePackageUseCase } from '../../../application/use-case/vendor/vendorPackage';
 import { PackageRepository } from "../../../infrastructure/repositories/PackageRepository";
 import { IPackage } from "../../../domain/entities/packageentities";
 import path from 'path';
@@ -9,22 +9,22 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 export class VendorPackageController {
   private registerPackageUseCase: RegisterPackageUseCase;
   private fetchPackageUsecase: FetchPackageUseCase;
-private updateSlotUseCase :UpdateSlotUseCase
-private fetchAllPackageUseCase :FetchAllPackagesUseCase
-private fetchPackageDetailsUseCase:FetchPackageDetailsUseCase
-private checkavailabilityUseCase :CheckavailabilityUseCase 
-private  deletePackageUseCase: DeletePackageUseCase;
-private updatePackageUseCase:UpdatePackageUseCase
+  private updateSlotUseCase: UpdateSlotUseCase
+  private fetchAllPackageUseCase: FetchAllPackagesUseCase
+  private fetchPackageDetailsUseCase: FetchPackageDetailsUseCase
+  private checkavailabilityUseCase: CheckavailabilityUseCase
+  private deletePackageUseCase: DeletePackageUseCase;
+  private updatePackageUseCase: UpdatePackageUseCase
   constructor() {
     const packageRepository = new PackageRepository();
     this.registerPackageUseCase = new RegisterPackageUseCase(packageRepository);
     this.fetchPackageUsecase = new FetchPackageUseCase(packageRepository);
     this.updateSlotUseCase = new UpdateSlotUseCase(packageRepository);
     this.fetchAllPackageUseCase = new FetchAllPackagesUseCase(packageRepository)
-    this.fetchPackageDetailsUseCase =new FetchPackageDetailsUseCase(packageRepository)
-    this.checkavailabilityUseCase  = new CheckavailabilityUseCase (packageRepository);
-    this.deletePackageUseCase  = new DeletePackageUseCase (packageRepository)
-  this.updatePackageUseCase = new UpdatePackageUseCase(packageRepository)
+    this.fetchPackageDetailsUseCase = new FetchPackageDetailsUseCase(packageRepository)
+    this.checkavailabilityUseCase = new CheckavailabilityUseCase(packageRepository);
+    this.deletePackageUseCase = new DeletePackageUseCase(packageRepository)
+    this.updatePackageUseCase = new UpdatePackageUseCase(packageRepository)
   }
   registerPackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -46,12 +46,12 @@ private updatePackageUseCase:UpdatePackageUseCase
         exclusion: parsedData.exclusion || [],
         packageDescription: parsedData.packageDescription,
         dayDescriptions: parsedData.dayDescriptions || [],
-       // Include bookedDates from parsed data if available
-       // Include additionalSlots from parsed data if available
+        // Include bookedDates from parsed data if available
+        // Include additionalSlots from parsed data if available
         maxPersons: parseInt(parsedData.maxPersons),
         minPersons: parseInt(parsedData.minPersons),
-        maxDuration:parseInt(parsedData.maxDuration),
-        PackageType:parsedData.PackageType,
+        maxDuration: parseInt(parsedData.maxDuration),
+        PackageType: parsedData.PackageType,
         isBlocked: false, // Initially not blocked
         isVerified: false, // Initially not verified
         images: [
@@ -59,7 +59,7 @@ private updatePackageUseCase:UpdatePackageUseCase
           ...(req.files as any)?.image2?.map((file: any) => path.basename(file.key)) || [],
           ...(req.files as any)?.image3?.map((file: any) => path.basename(file.key)) || [],
         ],
-    
+
         maxPackagesPerDay: parsedData.maxPackagesPerDay || 1, // Default to 1 package per day if not provided
       };
 
@@ -85,18 +85,18 @@ private updatePackageUseCase:UpdatePackageUseCase
       const vendorId = req.query.vendorId as string;
       const page = parseInt(req.query.page as string, 10) || 1;
       const limit = parseInt(req.query.limit as string, 10) || 10;
-  
+
       if (!vendorId) {
         res.status(400).json({ status: 'error', message: 'vendorId is required' });
         return;
       }
-  
+
       const result = await this.fetchPackageUsecase.execute(vendorId, page, limit);
       const data = result.data;
       const totalCount = result.totalCount ?? 0; // Ensure totalCount is always defined
-  
+
       const s3Client = new S3Client({ region: process.env.AWS_REGION });
-  
+
       for (const pkg of data) {
         pkg.images = await Promise.all(
           pkg.images.map(async (imageKey: string) => {
@@ -111,9 +111,9 @@ private updatePackageUseCase:UpdatePackageUseCase
           })
         );
       }
-  
+
       const totalPages = Math.ceil(totalCount / limit);
-  console.log('this is the data from the pagination data',data)
+      console.log('this is the data from the pagination data', data)
       res.status(200).json({
         status: 'success',
         message: 'Packages fetched successfully',
@@ -130,18 +130,18 @@ private updatePackageUseCase:UpdatePackageUseCase
       res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
   };
-  
-  
-  updateSlot =async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
- try{
 
-  const { packageId, date, maximumAllowedPackages } = req.body;
-console.log(req.body)
+
+  updateSlot = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+
+      const { packageId, date, maximumAllowedPackages } = req.body;
+      console.log(req.body)
       if (!packageId || !date || maximumAllowedPackages === undefined) {
         res.status(400).json({ error: "Missing required fields." });
         return;
       }
-console.log(req.body)
+      console.log(req.body)
       const updatedPackage = await this.updateSlotUseCase.updateSlot(
         packageId,
         date,
@@ -150,20 +150,20 @@ console.log(req.body)
 
       res.status(200).json({ success: true, data: updatedPackage });
 
- }catch(error){
-  console.error('Error fetching packages:', error);
-  res.status(500).json({ status: 'error', message: 'Internal server error' });
- }
+    } catch (error) {
+      console.error('Error fetching packages:', error);
+      res.status(500).json({ status: 'error', message: 'Internal server error' });
+    }
   }
 
 
-  fetchallpackages = async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-    try{
+  fetchallpackages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
 
-   console.log('fetch all packages ')
-   const result = await this.fetchAllPackageUseCase.execute();
+      console.log('fetch all packages ')
+      const result = await this.fetchAllPackageUseCase.execute();
 
-   const packages = result.data;
+      const packages = result.data;
 
       const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
@@ -181,30 +181,30 @@ console.log(req.body)
           })
         );
       }
-   res.status(result?.status === 'success' ? 200 : 401).json({ 
-    status: result?.status,
-    message: result?.message,
-    data:packages
-  });
+      res.status(result?.status === 'success' ? 200 : 401).json({
+        status: result?.status,
+        message: result?.message,
+        data: packages
+      });
 
-    }catch(error){
+    } catch (error) {
       console.error('Error fetching packages:', error);
       res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
   }
 
-  fetchpackage=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-   try{
+  fetchpackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
 
-    const id = req.query.id as string;
-    // console.log(id);
+      const id = req.query.id as string;
+      // console.log(id);
 
-    const result = await this.fetchPackageDetailsUseCase.execute(id)
-    const packageData = result.data; // Assuming this is an array of packages
-    
+      const result = await this.fetchPackageDetailsUseCase.execute(id)
+      const packageData = result.data; // Assuming this is an array of packages
+
 
       if (!packageData || packageData.length === 0) {
-         res.status(404).json({
+        res.status(404).json({
           status: "error",
           message: "No packages found for the provided ID.",
         });
@@ -225,7 +225,7 @@ console.log(req.body)
           return null; // Return null for empty image keys
         })
       );
-  
+
       // console.log("Package with Signed URLs:", packageData);
       // Send the final response with resolved image URLs
       res.status(200).json({
@@ -234,13 +234,13 @@ console.log(req.body)
         data: packageData,
       });
 
-    
-   }catch(error){
 
-   }
+    } catch (error) {
+
+    }
   }
 
-   checkAvailability=async(req: Request, res: Response): Promise<void>=> {
+  checkAvailability = async (req: Request, res: Response): Promise<void> => {
     console.log(req.body)
     const { packageId, date, numPeople } = req.body;
 
@@ -257,10 +257,10 @@ console.log(req.body)
       const result = await this.checkavailabilityUseCase.execute(packageId, date, numPeople);
 
       // Send the result back to the frontend
-      res.status(200).json({ 
+      res.status(200).json({
         status: result?.status,
         message: result?.message,
-        
+
       });
     } catch (error) {
       console.error('Error in checkAvailability controller:', error);
@@ -274,16 +274,16 @@ console.log(req.body)
 
 
 
- deletePackage=  async(req: Request, res: Response, next: NextFunction): Promise<void>=> {
-     // Assuming package ID is passed in the URL as a parameter
-     const packageId = req.query.packageId as string;
-console.log('the iddd' ,packageId)
+  deletePackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // Assuming package ID is passed in the URL as a parameter
+    const packageId = req.query.packageId as string;
+    console.log('the iddd', packageId)
     try {
-    const result = await this.deletePackageUseCase.execute(packageId);
-    res.status(200).json({
-      status:result.status,
-      message:result.message
-    })
+      const result = await this.deletePackageUseCase.execute(packageId);
+      res.status(200).json({
+        status: result.status,
+        message: result.message
+      })
     } catch (error) {
       // Handle unexpected errors
       console.error('Error in deletePackage controller:', error);
@@ -297,20 +297,20 @@ console.log('the iddd' ,packageId)
 
 
 
-  updatepackage =async(req: Request, res: Response, next: NextFunction): Promise<void>=> {
-    try{
+  updatepackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
 
       console.log(req.body)
-     
-   
-      const packageData = req.body;  
+
+
+      const packageData = req.body;
       const packageId = packageData._id
       console.log(packageData._id);
       if (!packageId) {
         res.status(400).json({ error: "Package ID is required" });
       }
 
-      
+
       const updatedPackage = await this.updatePackageUseCase.execute(packageId, packageData);
 
       if (!updatedPackage) {
@@ -321,7 +321,7 @@ console.log('the iddd' ,packageId)
         message: "Package updated successfully",
         data: updatedPackage,
       });
-    }catch (error) {
+    } catch (error) {
       // Handle unexpected errors
       console.error('Error in deletePackage controller:', error);
       res.status(500).json({
@@ -330,6 +330,6 @@ console.log('the iddd' ,packageId)
       });
     }
   }
-    
+
 
 }
