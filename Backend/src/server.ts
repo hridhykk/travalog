@@ -17,11 +17,12 @@ dotenv.config();
 const app: Express = express();
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.json({ limit: '50mb' }));
+// app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
-// app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({secret:config.sessionSecret,resave:true,saveUninitialized:true, cookie: {
   secure: process.env.NODE_ENV === 'production',
