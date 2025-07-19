@@ -6,6 +6,8 @@ import { IBooking } from "../../../domain/entities/bookingentities";
 import { BookingUseCase } from "../../../application/use-case/user/bookings";
 
 import { AdminWalletRepository } from "../../../infrastructure/repositories/AdminWalletRepository";
+console.log("RZP KEY:", process.env.RAZORPAY_KEY_ID);
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,

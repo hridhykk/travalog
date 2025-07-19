@@ -3,7 +3,7 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
   formData.append("file", file);
   formData.append("upload_preset", "unsigned_preset"); // Must match the one in Cloudinary
 
-  const cloudName = ""; // Replace with your Cloudinary cloud name
+  const cloudName = "dna6lldor"; // Replace with your Cloudinary cloud name
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: "POST",
