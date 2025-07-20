@@ -1,8 +1,12 @@
+
 import Footer from './common/Footer';
 import { useState, useEffect } from 'react';
 import { User, Tag, ShieldCheck } from 'lucide-react';
 import Header from './common/commonHeader';
 import { motion, AnimatePresence } from "framer-motion"
+
+import Slider from "react-slick";
+
 const heroDetails = [{
   id: 0,
   title: "KERALA",
@@ -63,6 +67,20 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const sliderSettings = {
+    className: "center",
+    centerMode: true,
+    infinite: true,
+    centerPadding: "0px",
+    slidesToShow: 3,
+    speed: 500,
+    dots: true,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: false
+  };
+
+
   const currentData = heroDetails[currentIndex];
   console.log("Updated file loaded!");
   return (
@@ -121,7 +139,25 @@ const HomePage = () => {
               )}
             </AnimatePresence>
           </div>
+
         </div>
+        <div className='slider-container'>
+          <Slider {...sliderSettings}>
+            {heroDetails.map((hero) => (
+              <div key={hero.id} className="px-2">
+                <img
+                  src={hero.cardImg}
+                  alt={hero.title}
+                  className="
+                 w-full h-64 object-cover shadow-lg"
+                />
+                <h3 className="text-center mt-2 text-lg font-semibold">{hero.title}</h3>
+              </div>
+            ))}
+          </Slider> 
+        </div>
+
+
 
 
         <div className="bg-grey py-12 shadow-lg">

@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.slick-slide {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0.6;
+}
+
+.slick-center {
+  transform: scale(1.1); /* Enlarge center card */
+  opacity: 1;           /* Make center card fully visible */
+  z-index: 2;
+}
