@@ -59,45 +59,7 @@ export class VendorPackageController {
     };
 
     const result = await this.registerPackageUseCase.execute(packageData);
-  registerPackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      // console.log('Incoming Request Body:', req.body);
-      // console.log('Incoming Files:', req.files);
-
-      // Parse package data
-      const parsedData = JSON.parse(req.body.packageData);
-
-      // Construct the package data object
-      const packageData: IPackage = {
-        vendorId: parsedData.vendorId,
-        packageName: parsedData.packageName,
-        companyName: parsedData.companyName,
-        venue: parsedData.venue,
-        price: parseFloat(parsedData.price),
-        duration: parsedData.duration,
-        inclusion: parsedData.inclusion || [],
-        exclusion: parsedData.exclusion || [],
-        packageDescription: parsedData.packageDescription,
-        dayDescriptions: parsedData.dayDescriptions || [],
-        // Include bookedDates from parsed data if available
-        // Include additionalSlots from parsed data if available
-        maxPersons: parseInt(parsedData.maxPersons),
-        minPersons: parseInt(parsedData.minPersons),
-        maxDuration: parseInt(parsedData.maxDuration),
-        PackageType: parsedData.PackageType,
-        isBlocked: false, // Initially not blocked
-        isVerified: false, // Initially not verified
-        images: [
-          ...(req.files as any)?.image1?.map((file: any) => path.basename(file.key)) || [],
-          ...(req.files as any)?.image2?.map((file: any) => path.basename(file.key)) || [],
-          ...(req.files as any)?.image3?.map((file: any) => path.basename(file.key)) || [],
-        ],
-
-        maxPackagesPerDay: parsedData.maxPackagesPerDay || 1, // Default to 1 package per day if not provided
-      };
-
-      // Call the use case to register the package
-      const result = await this.registerPackageUseCase.execute(packageData);
+ 
 
     if (result.status === 'success') {
       res.status(201).json(result);
