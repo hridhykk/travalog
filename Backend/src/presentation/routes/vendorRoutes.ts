@@ -29,18 +29,6 @@ router.post('/editvendor',vendorProfileController.editvendor)
 
 router.post(
   '/registerPackage',
-  (req, res, next) => {
-    uploadS3(req, res, (err) => {
-      if (err) {
-        console.error('Multer Error:', err);
-        return res.status(400).json({
-          status: 'error',
-          message: err.message,
-        });
-      }
-      next();
-    });
-  },
   vendorPackageController.registerPackage
 );
 

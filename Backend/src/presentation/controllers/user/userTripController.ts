@@ -4,14 +4,14 @@ import { BookingRepository } from "../../../infrastructure/repositories/BookingR
 import { PackageRepository } from "../../../infrastructure/repositories/PackageRepository";
 import { IBooking } from "../../../domain/entities/bookingentities";
 import { BookingUseCase } from "../../../application/use-case/user/bookings";
+
+import { AdminWalletRepository } from "../../../infrastructure/repositories/AdminWalletRepository";
 console.log("RZP KEY:", process.env.RAZORPAY_KEY_ID);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
-
-import { AdminWalletRepository } from "../../../infrastructure/repositories/AdminWalletRepository";
 
 
 export class UserTripController{
@@ -21,6 +21,8 @@ private bookingUseCase :BookingUseCase
   const packageRepository = new PackageRepository();
   const adminWalletRepo = new  AdminWalletRepository ();
   this.bookingUseCase = new BookingUseCase (bookingRepository,packageRepository,adminWalletRepo)
+  
+
   }
 
   createorder = async (req: Request, res: Response,next:NextFunction): Promise<void> => {

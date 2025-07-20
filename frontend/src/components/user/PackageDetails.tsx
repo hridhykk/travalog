@@ -88,14 +88,14 @@ const PackageDetailsPage: React.FC = () => {
           {/* Render the single image */}
           <div className="relative">
   {packageData.images.length > 0 ? (
-    <img
-      src={packageData.images[0]} // Display the first image
-      alt={packageData.packageName}
-      className="w-full h-80 object-cover rounded-t-lg"
-      onError={(e) => {
-        e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available"; // Fallback image
-      }}
-    />
+  <img
+  src={decodeURIComponent(packageData.images[0].split("/uploadimages/")[1])}
+  alt={packageData.packageName}
+  className="w-full h-80 object-cover rounded-t-lg"
+  onError={(e) => {
+    e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
+  }}
+/>
   ) : (
     <div className="w-full h-80 bg-gray-300 flex justify-center items-center">
       <span className="text-white text-xl">No Image Available</span>
