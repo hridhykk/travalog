@@ -8,6 +8,6 @@ export interface IVendorRepository{
   updateVendor(userId: string, userData: Partial<IVendor>): Promise<IVendor | null>;
   updateVendorVerification(vendorId: string, is_Verified: boolean): Promise<{ status: string; message: string; vendor?: IVendor }>;
   updatePasswordByEmail(email: string, newPassword: string): Promise<IVendor | null>;
-  updateVendorDetails(vendorId: string, updatedData: Partial<IVendor>): Promise<IVendor | null>
+  updateVendorDetails(vendorId: string, updatedData: Partial<IVendor>): Promise<IVendor | null>;
+  getVendorCount(range: String): Promise<number>;
 }
-

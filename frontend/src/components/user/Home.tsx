@@ -1,3 +1,8 @@
+
+
+
+
+
 import Footer from './common/Footer';
 import { useState, useEffect } from 'react';
 import { User, Tag, ShieldCheck } from 'lucide-react';

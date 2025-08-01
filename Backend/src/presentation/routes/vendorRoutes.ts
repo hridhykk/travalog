@@ -4,6 +4,7 @@ import { VendorProfileController } from "../controllers/vendor/VendorProfileCont
 import { VendorPackageController } from '../controllers/vendor/VendorPackageController';
 import  uploadS3 from '../../utils/multer'
 import { VendorBookingsController } from "../controllers/vendor/VendorBookingDetails";
+import { Request, Response } from "express";
 const router = Router();
 
 

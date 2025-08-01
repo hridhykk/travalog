@@ -107,22 +107,26 @@ console.log("orderid",bookingId)
   };
 
 
-userReview  = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    try {
-      const review: IReview = {
-  userId: req.query.userId as string,
-  packageId: req.query.packageId as string,
-  vendorId: req.query.vendorId as string,
-  rating: Number(req.query.rating),
-  comment: req.query.comment as string,
-};
+userReview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    console.log(req.body);
 
-console.log(review)
-      const result = await this.userReviewUseCase.execute(review)
+    const review: IReview = {
+      userId: req.body.userId as string,
+      packageId: req.body.packageId as string,
+      vendorId: req.body.vendorId as string,
+      rating: Number(req.body.rating),
+      comment: req.body.comment as string,
+    };
+
+    console.log("Parsed Review:", review);
+
+    const result = await this.userReviewUseCase.execute(review);
+    console.log("Review Use Case Result:", result);
       res.status(200).json({
         status: result.status,
         message: result.message,

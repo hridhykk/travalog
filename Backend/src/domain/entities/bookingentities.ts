@@ -4,6 +4,7 @@ export interface IBooking {
   _id?: string;
   orderId: string; 
  userId: mongoose.Types.ObjectId | string;
+ vendorId?: mongoose.Types.ObjectId| string;
   paymentId: string; 
   amount: number; 
   bookedDate: string;  

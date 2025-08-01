@@ -74,27 +74,22 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
   ];
 
   // Handle image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const files = e.target.files;
   if (!files) return;
 
   const uploads = Array.from(files).map((file) => uploadToCloudinary(file));
 
   try {
-    const results = await Promise.all(uploads); // all image URLs from Cloudinary
+    const results = await Promise.all(uploads); // Cloudinary URLs
     setImageURLs((prev) => [...prev, ...results]);
+    setImagePreviews((prev) => [...prev, ...results]); // Previews from Cloudinary URLs only
+    alert('Images uploaded successfully!', results);
   } catch (err) {
     console.error("Image upload error:", err);
   }
 };
-  // Delete an image
-  const handleImageDelete = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    setImages(updatedImages);
 
-    const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImagePreviews(updatedPreviews);
-  };
 
   // Dynamic Field Handlers
   const addField = (fieldName: string, value: string) => {
@@ -117,7 +112,7 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
       ...data,
       vendorId,
       price: parseFloat(data.price),
-      images: imageURLs, // ← SEND only URLs!
+     images: imageURLs, // ← SEND only URLs!
     };
 
     const response = await axios.post('http://localhost:5000/vendor/registerPackage', payload);
@@ -400,13 +395,13 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
                   alt={`Preview ${index + 1}`}
                   className="w-full h-20 object-cover rounded"
                 />
-                <button
+                {/* <button
                   type="button"
                   onClick={() => handleImageDelete(index)}
                   className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
                 >
                   &times;
-                </button>
+                </button> */}
               </div>
             ))}
           </div>

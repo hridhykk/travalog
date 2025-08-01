@@ -121,7 +121,7 @@ export class UserReviewUseCase{
       console.error('Error in RegisterPackageUseCase:', error);
       return {
         status: 'error',
-        message: 'Failed to add package'
+        message: 'Failed to add review'
       };
     }
   }

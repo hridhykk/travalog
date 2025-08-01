@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { logout } from '../../../features/vendor/vendorSlice';
+import { logout } from '../../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { image } from '@nextui-org/react';
 

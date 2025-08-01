@@ -1,6 +1,8 @@
 import { IVendorRepository } from "../../domain/interfaces/repositories/iVendorRepository";
 import { IVendor } from "../../domain/entities/vendorentities";
 import { VendorModel } from "../models/vendorModel";
+import moment from "moment";
+
 
 export class VendorRepository implements IVendorRepository{
   async FindByEmail(email: string): Promise<IVendor | null> {
@@ -100,6 +102,8 @@ return VendorModel.create(user)
       throw error;
     }
   }
+
+
   async updateVendorDetails(vendorId: string, updatedData: Partial<IVendor>): Promise<IVendor | null> {
     try {
       const updatedVendor = await VendorModel.findOneAndUpdate(
@@ -123,4 +127,47 @@ return VendorModel.create(user)
       throw error;
     }
   }
+
+
+  async getVendorCount(range: "daily" | "weekly" | "monthly" | "yearly" | "all"): Promise<number> {
+    console.log("Range in getVendorCount:2222222", range);
+    if (range === "all") {
+      return await VendorModel.countDocuments({});
+    }
+
+    const { start, end } = this.getDateRange(range);
+
+    return await VendorModel.countDocuments({
+      createdAt: {
+        $gte: start,
+        $lte: end,
+      },
+    });
+  }
+
+
+private getDateRange(range: "daily" | "weekly" | "monthly" | "yearly") {
+    const now = moment();
+    let start: moment.Moment;
+
+    switch (range) {
+      case "daily":
+        start = now.clone().startOf("day");
+        break;
+      case "weekly":
+        start = now.clone().startOf("week");
+        break;
+      case "monthly":
+        start = now.clone().startOf("month");
+        break;
+      case "yearly":
+        start = now.clone().startOf("year");
+        break;
+      default:
+        start = now.clone().startOf("day");
+    }
+
+    return { start: start.toDate(), end: now.toDate() };
+  }
+
 }

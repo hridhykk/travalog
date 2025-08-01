@@ -4,13 +4,25 @@ import { IBooking } from "../../domain/entities/bookingentities";
 import { BookingModel } from "../models/bookingModel";
 import { PackageModel } from "../models/packageModel";
 import { UserModel } from "../models/userModel";
-
+import mongoose from "mongoose";
 export class BookingRepository implements IBookingRepository {
 
 
   async create(bookingData: IBooking): Promise<IBooking> {
     try {
-      return await BookingModel.create(bookingData);
+     const packageDoc = await PackageModel.findById(bookingData.packageId).lean();
+
+    if (!packageDoc) {
+      throw new Error(`Package not found with id: ${bookingData.packageId}`);
+    }
+
+    // Add vendorId (as ObjectId)
+    const completeBookingData: IBooking = {
+      ...bookingData,
+      vendorId: new mongoose.Types.ObjectId(packageDoc.vendorId)
+    };
+
+    return await BookingModel.create(completeBookingData);
     } catch (error) {
       console.error('Error creating booking:', error);
       throw error;
@@ -85,7 +97,7 @@ async FindBookings(vendorId: string, page: number, limit: number): Promise<{ boo
   { $match: { packageId: { $in: packageIds } } },
   {
     $addFields: { 
-      userObjectId: { $toObjectId: '$userId' } // 👈 convert string to ObjectId
+      userObjectId: { $toObjectId: '$userId' } 
     }
   },
   {

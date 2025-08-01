@@ -7,6 +7,8 @@ const BookingSchema: Schema = new Schema<IBooking>(
     orderId: { type: String, required: true, unique: true },
     paymentId: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
+
     amount: { type: Number, required: true },
     numPeople: { type: Number, required: true },
     packageId:{ type: String, required: true },
