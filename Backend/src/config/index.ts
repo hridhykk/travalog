@@ -5,7 +5,7 @@ export const config = {
   sessionSecret: "mysitesessionsecret",
   port: process.env.PORT || 5000,
   database: {
-    url: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/TRAVALOG'
+    url: process.env.MONGODB_URI || 'mongodb+srv://hridhyarenjithkk:SqShE8oTC8qrIgj4@cluster0.slxoxsp.mongodb.net/travalog?retryWrites=true&w=majority&appName=Cluster0'
   },
   jwt: {
     secret: process.env.JWT_SECRET_KEY || 'hellooiamhridhya',

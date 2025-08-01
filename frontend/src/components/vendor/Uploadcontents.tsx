@@ -71,6 +71,7 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
     'Family Trip',
     'Honeymoon Trip',
     'Couple-Friendly Trip',
+    'Luxury Trip'
   ];
 
   // Handle image upload

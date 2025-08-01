@@ -1,13 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.slick-slide {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-  opacity: 0.6;
+
+/* HIDE default arrows by removing :before content */
+.slick-prev::before,
+.slick-next::before {
+  display: none !important;
 }
 
-.slick-center {
-  transform: scale(1.1); /* Enlarge center card */
-  opacity: 1;           /* Make center card fully visible */
-  z-index: 2;
+/* Custom Arrow Styles */
+.slick-prev,
+.slick-next {
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Specific position */
+.slick-prev {
+  left: 10px !important;
+}
+
+.slick-next {
+  right: 10px !important;
+}
+
+/* Gap between slides */
+.slick-slide > div {
+  margin-right: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.slick-slide:last-child > div {
+  margin-right: 0;
 }

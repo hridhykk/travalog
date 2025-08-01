@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../../components/user/common/commonHeader';
+import Header from '../../components/user/common/commonHeader2';
 import PopularTrips from '../../components/user/Trips';
 import Footer from '../../components/user/common/Footer';
 
