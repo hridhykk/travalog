@@ -3,6 +3,7 @@ import { vendorAxios } from "../Axiosconfig/Axiosconfig";
 import { vendorLoginarg, vendorRegisterData, vendorResponseData } from "../features/vendor/vendorType";
 import { AxiosResponse } from "axios";
 
+// import axios from "axios";
 
 export interface VendorApiService {
   Register: (registerData: vendorRegisterData) => Promise<AxiosResponse<vendorResponseData>>;

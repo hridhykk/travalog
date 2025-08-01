@@ -12,6 +12,7 @@ const MySwal = withReactContent(Swal);
 type BookingData = {
   orderId: string;
   paymentId: string;
+  vendorId:string;
   amount: number;
   numPeople: number;
   packageId: string;
@@ -105,7 +106,7 @@ const BookingDetails: React.FC = () => {
       const payload = {
         userId,
         packageId: booking.packageId,
-        vendorId: 'your-vendor-id', // Ideally get this from booking details
+        vendorId: booking.vendorId, 
         rating,
         comment: reviewText
       };
@@ -177,7 +178,7 @@ const BookingDetails: React.FC = () => {
                 </div>
 
                 {/* Review Section */}
-                {isPastTrip && (
+                {/* {isPastTrip && ( */}
                   <div className="mt-10 border-t pt-6">
                     <h3 className="text-lg font-semibold mb-2">Leave a Review</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,7 +205,7 @@ const BookingDetails: React.FC = () => {
                       Submit Review
                     </Button>
                   </div>
-                )}
+                {/* )} */}
               </Card>
             );
           })
