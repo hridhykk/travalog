@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import SimilarPackageSlider from "./SimilarPackageSlider";
+
 interface PackageData {
-  _id:string;
+  _id: string;
   packageName?: string;
   companyName?: string;
+  PackageType?: string;
   venue?: string;
   price?: string | number;
   duration?: string;
@@ -23,23 +25,37 @@ interface PackageData {
   }[];
 }
 
+interface PackageDetailsResponse {
+  status: string;
+  data: PackageData;
+}
+
 const PackageDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [packageData, setPackageData] = useState<PackageData | null>(null);
+  const [currentImage, setCurrentImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!id) return;
 
     const fetchPackageDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get<PackageData>(
+        const response = await axios.get<PackageDetailsResponse>(
           `http://localhost:5000/vendor/fetchpackage`,
           { params: { id } }
         );
-        setPackageData(response.data.data);
+
+        const fetchedData = response.data.data;
+        setPackageData(fetchedData);
+        console.log("Fetched package data:", fetchedData);
+        if (fetchedData.images.length > 0) {
+          setCurrentImage(fetchedData.images[0]);
+        }
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching package details:", err);
@@ -51,9 +67,7 @@ const PackageDetailsPage: React.FC = () => {
     fetchPackageDetails();
   }, [id]);
 
-  const handleBookPackage = (id:string) => {
-    // This can redirect to a booking form or perform the booking logic
-    
+  const handleBookPackage = (id: string) => {
     navigate(`/user/slotavailability/${id}`);
   };
 
@@ -82,93 +96,80 @@ const PackageDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 py-10">
-      <div className="container mx-auto px-6 md:px-12">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Render the single image */}
-          <div className="relative">
-  {packageData.images.length > 0 ? (
-  <img
-  src={decodeURIComponent(packageData.images[0].split("/uploadimages/")[1])}
-  alt={packageData.packageName}
-  className="w-full h-80 object-cover rounded-t-lg"
-  onError={(e) => {
-    e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
-  }}
-/>
-  ) : (
-    <div className="w-full h-80 bg-gray-300 flex justify-center items-center">
-      <span className="text-white text-xl">No Image Available</span>
-    </div>
-  )}
-  <div className="absolute top-0 left-0 right-0 bottom-0 bg-opacity-40 flex justify-center items-center">
-    <h1 className="text-white text-4xl font-semibold">{packageData.packageName}</h1>
-  </div>
-</div>
+    <div className="container mx-auto px-4 py-10">
 
 
-
-          <div className="px-6 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="text-lg text-gray-700">
-                  <strong>Company:</strong> {packageData.companyName}
-                </div>
-                <div className="text-lg text-gray-700">
-                  <strong>Venue:</strong> {packageData.venue}
-                </div>
-                <div className="text-lg text-gray-700">
-                  <strong>Price:</strong> ₹{packageData.price}
-                </div>
-                <div className="text-lg text-gray-700">
-                  <strong>Duration:</strong> {packageData.duration}
-                </div>
-                {packageData.maxPersons && (
-                  <div className="text-lg text-gray-700">
-                    <strong>Max Persons:</strong> {packageData.maxPersons}
-                  </div>
-                )}
-                {packageData.minPersons && (
-                  <div className="text-lg text-gray-700">
-                    <strong>Min Persons:</strong> {packageData.minPersons}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div className="text-lg text-gray-700">
-                  <strong>Inclusion:</strong> {packageData.inclusion.join(", ")}
-                </div>
-                <div className="text-lg text-gray-700">
-                  <strong>Exclusion:</strong> {packageData.exclusion.join(", ")}
-                </div>
-                <div className="text-xl font-semibold text-gray-800">Description</div>
-                <p className="text-gray-600">{packageData.packageDescription}</p>
-              </div>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div className="text-xl font-semibold text-gray-800">Day Descriptions</div>
-              <ul className="list-disc list-inside text-gray-600">
-                {packageData.dayDescriptions.map((desc, index) => (
-                  <li key={index}>{desc}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Place the Book Package Button at the bottom */}
-          <div className="px-6 py-4 bg-gray-100">
-            <button
-              onClick={() =>handleBookPackage(packageData._id)}
-              className="w-full py-2 bg-green-600 text-white rounded-sm hover:bg-green-700"
-            >
-              Book the Package
-            </button>
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="w-full md:w-1/2">
+          <img
+            src={currentImage}
+            alt="Package"
+            className="w-full h-auto rounded-lg shadow-md"
+          />
+          {/* Add thumbnails if multiple images */}
+          <div className="flex mt-2 gap-2">
+            {packageData.images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`Thumbnail ${index}`}
+                className={`w-20 h-20 object-cover cursor-pointer border ${currentImage === img ? "border-blue-500" : "border-gray-300"}`}
+                onClick={() => setCurrentImage(img)}
+              />
+            ))}
           </div>
         </div>
+
+        <div className="w-full md:w-1/2">
+          <h1 className="text-3xl font-bold mb-4">{packageData.packageName}</h1>
+          <p className="mb-2"><strong>Company:</strong> {packageData.companyName}</p>
+          <p className="mb-2"><strong>Venue:</strong> {packageData.venue}</p>
+          <p className="mb-2"><strong>Price:</strong> ₹{packageData.price}</p>
+          <p className="mb-2"><strong>Duration:</strong> {packageData.duration}</p>
+          <p className="mb-4 text-justify"><strong>Description:</strong> {packageData.packageDescription}</p>
+
+          <button
+            onClick={() => handleBookPackage(packageData._id)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+          >
+            Book Now
+          </button>
+        </div>
       </div>
+      <div>
+        <div className="md:flex md:space-x-20">
+          <div>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">Inclusions</h2>
+            <ul className="list-disc pl-5 mb-6">
+              {packageData.inclusion.map((item, index) => (
+                <li key={index} className="mb-2">{item}</li>
+              ))}
+            </ul>
+
+
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">Exclusions</h2>
+            <ul className="list-disc pl-5 mb-6">
+              {packageData.exclusion.map((item, index) => (
+                <li key={index} className="mb-2">{item}</li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+
+        <h2 className="text-2xl font-semibold mb-4">Day-wise Itinerary</h2>
+        {packageData.dayDescriptions.map((dayDesc, index) => (
+          <div key={index} className="mb-4">
+            
+            <p className="text-justify">{dayDesc}</p>
+          </div>
+        ))}
+      </div>
+      <SimilarPackageSlider packageType={packageData.PackageType || ""} _id={packageData._id} />
     </div>
+    
   );
 };
 

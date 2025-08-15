@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../../features/user/userSlice';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +52,7 @@ export const Header = () => {
 
   return (
     <header
-      className={`fixed w-full z-50 transition-all duration-z  ${
+      className={`fixed w-full z-[1100] transition-all duration-z  ${
         showHeader ? "bg-white text-black shadow-md" : "bg-transparent text-white"
       }`}
     >

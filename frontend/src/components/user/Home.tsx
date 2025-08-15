@@ -1,8 +1,3 @@
-
-
-
-
-
 import Footer from './common/Footer';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
@@ -24,6 +19,7 @@ interface Trip {
   duration: string;
   packageName: string;
   popularity: number;
+  location: string;
 }
 
 interface TripResponse {
@@ -173,7 +169,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          <FilterSearch />
+          <FilterSearch trips={trips} />
 
         </div>
 

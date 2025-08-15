@@ -176,24 +176,6 @@ fetchPackagesWithPagination = async (req: Request, res: Response, next: NextFunc
         });
       }
 
-      const s3Client = new S3Client({ region: process.env.AWS_REGION });
-
-      // Map through packages to fetch signed URLs for images
-      packageData.images = await Promise.all(
-        packageData.images.map(async (imageKey: string) => {
-          if (imageKey) {
-            const command = new GetObjectCommand({
-              Bucket: process.env.S3_BUCKET_NAME!,
-              Key: `travalog/vendor/uploadimages/${imageKey}`, // Ensure the path matches your S3 structure
-            });
-            return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-          }
-          return null; // Return null for empty image keys
-        })
-      );
-
-      // console.log("Package with Signed URLs:", packageData);
-      // Send the final response with resolved image URLs
       res.status(200).json({
         status: "success",
         message: "Package details fetched successfully",
@@ -202,9 +184,12 @@ fetchPackagesWithPagination = async (req: Request, res: Response, next: NextFunc
 
 
     } catch (error) {
-
-    }
-  }
+   res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+      });
+    }
+  }
 
   checkAvailability = async (req: Request, res: Response): Promise<void> => {
     console.log(req.body)

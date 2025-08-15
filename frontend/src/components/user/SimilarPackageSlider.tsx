@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Slider from "react-slick";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import StarIcon from '@mui/icons-material/Star';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 
 interface Trip {
     _id: string;
@@ -15,38 +15,40 @@ interface Trip {
     duration: string;
     popularity: number;
     packageName: string;
+    PackageType: string; // Used for filtering
 }
 
 interface Props {
-    trips: Trip[];
+    packageType: string;
+    _id?: string;
 }
 
-const settings = {
+const settings = (numSlides: number) => ({
     className: "center",
-    infinite: true,
+    infinite: numSlides > 3, // Disable infinite loop if not enough slides
     centerPadding: "60px",
-    slidesToShow: 4,
+    slidesToShow: Math.min(numSlides, 4), // Do not exceed number of packages
     arrows: false,
     swipeToSlide: true,
     responsive: [
         {
             breakpoint: 1024,
             settings: {
-                slidesToShow: 3,
+                slidesToShow: Math.min(numSlides, 3),
                 slidesToScroll: 1,
-                infinite: true,
+                infinite: numSlides > 2,
                 arrows: false,
-            }
+            },
         },
         {
             breakpoint: 768,
             settings: {
-                slidesToShow: 2,
+                slidesToShow: Math.min(numSlides, 2),
                 slidesToScroll: 1,
                 initialSlide: 1,
                 arrows: false,
-                dots: true
-            }
+                dots: true,
+            },
         },
         {
             breakpoint: 640,
@@ -54,21 +56,22 @@ const settings = {
                 slidesToShow: 1,
                 slidesToScroll: 1,
                 arrows: false,
-                dots: true
-            }
-        }
+                dots: true,
+            },
+        },
     ],
-};
+});
 
 
 const TrendingPackageCard: React.FC<{ trip: Trip }> = ({ trip }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const navigate = useNavigate();
+
     const handleDetailsClick = (id: string) => {
-        console.log(id);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-        navigate(`/user/packagedetails/${id}`); // Add a leading slash
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        navigate(`/user/packagedetails/${id}`);
     };
+
     return (
         <div className="p-2 transition-transform hover:scale-105 duration-300 hover:cursor-pointer" onClick={() => handleDetailsClick(trip._id)}>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden transition-shadow duration-300 h-full flex flex-col">
@@ -110,34 +113,77 @@ const TrendingPackageCard: React.FC<{ trip: Trip }> = ({ trip }) => {
     );
 };
 
-const TrendingPackageSlider: React.FC<Props> = ({ trips }) => {
+const SimilarPackageSlider: React.FC<Props> = ({ packageType, _id }) => {
     const sliderRef = useRef<Slider>(null);
-    const trendingPackages = trips
-        .filter(trip => trip.popularity > 2)
-        .sort((a, b) => b.popularity - a.popularity);
+    const [packages, setPackages] = useState<Trip[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPackages = async () => {
+            try {
+                const res = await axios.get<{ status: string; data: Trip[] }>(
+                    'http://localhost:5000/vendor/fetchallpackages'
+                );
+
+                const filtered = res.data.data
+                    .filter(trip => trip.PackageType === packageType && trip._id !== _id)
+                    .sort((a, b) => b.popularity - a.popularity);
+
+                setPackages(filtered);
+            } catch (err) {
+                console.error("Error fetching packages:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPackages();
+    }, [packageType, _id]);
+
+
+    if (loading) {
+        return <div className="text-center py-10">Loading trending packages...</div>;
+    }
+
+    if (packages.length === 0) {
+        return <div className="text-center py-10 text-gray-500">No similar packages available.</div>;
+    }
 
     return (
         <div className="mt-24">
             <div className="container">
                 <div className="flex items-center justify-between">
-                    <h1 className="font-bold">
-                        Trending Packages
-                    </h1>
-                    <div className="hidden md:flex  space-x-4 ">
-                        <button className="border-black border-3 rounded-full w-12 h-12  " onClick={() => sliderRef.current?.slickPrev()}><ArrowBackIosNewIcon /></button>
-                        <button className="border-black border-3 rounded-full w-12 h-12 " onClick={() => sliderRef.current?.slickNext()}><ArrowForwardIosIcon /></button>
+                    <h1 className="font-bold">Similar Package</h1>
+                    <div className="hidden md:flex space-x-4">
+                        <button
+                            className="border-black border-3 rounded-full w-12 h-12"
+                            onClick={() => sliderRef.current?.slickPrev()}
+                        >
+                            <ArrowBackIosNewIcon />
+                        </button>
+                        <button
+                            className="border-black border-3 rounded-full w-12 h-12"
+                            onClick={() => sliderRef.current?.slickNext()}
+                        >
+                            <ArrowForwardIosIcon />
+                        </button>
                     </div>
                 </div>
                 <div className="slider-container">
-                    <Slider ref={sliderRef} {...settings}>
-                        {trendingPackages.map(trip => (
-                            <TrendingPackageCard key={trip._id} trip={trip} />
+                    <Slider ref={sliderRef} {...settings(packages.length)}>
+                        {packages.map(trip => (
+                            <div key={trip._id} >
+                                <div className="max-w-[350px] ">
+                                    <TrendingPackageCard trip={trip} />
+                                </div>
+                            </div>
                         ))}
                     </Slider>
+
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default TrendingPackageSlider
+export default SimilarPackageSlider;

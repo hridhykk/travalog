@@ -26,12 +26,12 @@ const TravelPackageForm: React.FC = () => {
 
   type Base64Image = string;
 
-const [base64Images, setBase64Images] = useState<Base64Image[]>([]);
+  const [base64Images, setBase64Images] = useState<Base64Image[]>([]);
   const vendorId = useSelector((state: RootState) => state.vendor.vendor?._id);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-const [imageURLs, setImageURLs] = useState<string[]>([]); 
+  const [imageURLs, setImageURLs] = useState<string[]>([]);
 
   const {
     control,
@@ -75,21 +75,22 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
   ];
 
   // Handle image upload
-const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const files = e.target.files;
-  if (!files) return;
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
 
-  const uploads = Array.from(files).map((file) => uploadToCloudinary(file));
+    const uploads = Array.from(files).map((file) => uploadToCloudinary(file));
 
-  try {
-    const results = await Promise.all(uploads); // Cloudinary URLs
-    setImageURLs((prev) => [...prev, ...results]);
-    setImagePreviews((prev) => [...prev, ...results]); // Previews from Cloudinary URLs only
-    alert('Images uploaded successfully!', results);
-  } catch (err) {
-    console.error("Image upload error:", err);
-  }
-};
+    try {
+      const results = await Promise.all(uploads); // Cloudinary URLs
+      setImageURLs((prev) => [...prev, ...results]);
+      setImagePreviews((prev) => [...prev, ...results]); // Previews from Cloudinary URLs only
+      alert('Images uploaded successfully!');
+      console.log('Uploaded image URLs:', results);
+    } catch (err) {
+      console.error("Image upload error:", err);
+    }
+  };
 
 
   // Dynamic Field Handlers
@@ -106,32 +107,32 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
   // Form submission
   const onSubmit = async (data: TravelPackageFormData) => {
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const payload = {
-      ...data,
-      vendorId,
-      price: parseFloat(data.price),
-     images: imageURLs, // ← SEND only URLs!
-    };
+    try {
+      const payload = {
+        ...data,
+        vendorId,
+        price: parseFloat(data.price),
+        images: imageURLs, // ← SEND only URLs!
+      };
 
-    const response = await axios.post('http://localhost:5000/vendor/registerPackage', payload);
+      const response = await axios.post('http://localhost:5000/vendor/registerPackage', payload);
 
-    if (response.data.status === 'success') {
-      alert('Package uploaded successfully!');
-      reset();
-      setImageURLs([]);
-    } else {
-      throw new Error(response.data.message || 'Upload failed');
+      if (response.data.status === 'success') {
+        alert('Package uploaded successfully!');
+        reset();
+        setImageURLs([]);
+      } else {
+        throw new Error(response.data.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload package');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Upload error:', error);
-    alert('Failed to upload package');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   return (

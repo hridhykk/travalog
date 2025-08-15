@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input } from '@nextui-org/react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/react';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import { Pencil } from 'lucide-react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Stack
+} from '@mui/material';
 import axios from 'axios';
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
@@ -39,26 +46,22 @@ export const UserDetails: React.FC = () => {
     district: '',
     state: '',
   });
+
   const id = useSelector((state: RootState) => state.auth.user?._id);
+
   useEffect(() => {
-    // Simulate an API call to fetch vendor data
     const fetchVendorData = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/user/fetchuser`, {
-          params: {id},
-        }); // Replace with your API endpoint
-      
-         
-          setVendorData(response.data.data);
-       
+          params: { id },
+        });
+        setVendorData(response.data.data);
       } catch (error) {
         console.error('Error fetching vendor data:', error);
       }
     };
-
     fetchVendorData();
-  }, []);
-
+  }, [id]);
 
   const handleSubmitEditDetails = async () => {
     try {
@@ -95,8 +98,8 @@ export const UserDetails: React.FC = () => {
       newError.city = 'City name is required';
       valid = false;
     }
-    if (!/^[0-9]{7}$/.test(address.pincode)) {
-      newError.pincode = 'Pincode must be a 7-digit number';
+    if (!/^[0-9]{6}$/.test(address.pincode)) {
+      newError.pincode = 'Pincode must be a 6-digit number';
       valid = false;
     }
     if (!address.district.trim()) {
@@ -122,61 +125,57 @@ export const UserDetails: React.FC = () => {
   };
 
   const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50/50 hover:bg-gray-50/80 transition-colors">
+    <div className="flex items-start space-x-4 p-5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
       <div className="flex-1">
-        <p className="text-sm font-medium text-gray-500">{label}</p>
+       <div className='flex items-center justify-between'>
+         <p className="text-sm text-center mb-0 font-medium text-gray-500">{label}</p>
+        {label === "Address" && (
+        <Button
+          variant="text"
+          color="primary"
+          endIcon={<Pencil className="w-4 h-4" />}
+          onClick={() => setIsOpen(true)}
+        >
+          Edit Address
+        </Button>
+      )}
+       </div>
         <p className="mt-1 text-base text-gray-900">{value || 'Data is not available'}</p>
       </div>
+      
     </div>
   );
 
   return (
-    <div className="relative flex-1 mx-auto p-6 space-y-8" style={{ marginTop: '2cm' }}>
+    <div className="flex-1 mx-auto pt-32 space-y-10 pb-28">
       {/* Hero Section */}
-      <div className="relative h-72 rounded-xl overflow-hidden">
-        <div className="absolute inset-0" />
-        <div 
-          className="absolute inset-0"
-          style={{ 
-            backgroundImage: 'url("/bg.jpeg")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-6">
-          <h1 className="text-4xl font-bold mb-4">{vendorData?.name || 'Data is not available'}</h1>
-          <div className="h-px w-24 bg-white/30 mb-4" />
+      <div className="relative container bg-gradient-to-r from-blue-600 to-purple-600 h-72 rounded-xl overflow-hidden shadow-md">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-10">
+          <h1 className="text-4xl font-bold mb-6">
+            Hi, {vendorData?.name || 'Data is not available'}
+          </h1>
+          <div className="h-px w-24 bg-white/40" />
         </div>
       </div>
 
       {/* Profile Details */}
-      <Card className="shadow-lg">
-        <CardHeader className="flex justify-between items-start p-6">
-          <div>
-            <h2 className="text-2xl font-semibold">Profile Details</h2>
-          </div>
-          <Button 
-            color="primary"
-            variant="bordered"
-            endContent={<Pencil className="w-4 h-4" />}
-            onPress={() => setIsOpen(true)}
-          >
-            Add Address
-          </Button>
+      <Card className="shadow-lg container">
+        <CardHeader className="flex justify-between items-start p-6 pb-4">
+          <h2 className="text-2xl font-semibold">Profile Details</h2>
           <Button
-              color="primary"
-              variant="solid"
-              endContent={<Pencil className="w-4 h-4" />}
-              onPress={() => {
-                setEditDetails(vendorData);
-                setIsEditModalOpen(true);
-              }}
-            >
-              Edit Details
-            </Button>
+            variant="contained"
+            color="primary"
+            endIcon={<Pencil className="w-4 h-4" />}
+            onClick={() => {
+              setEditDetails(vendorData);
+              setIsEditModalOpen(true);
+            }}
+          >
+            Edit Details
+          </Button>
         </CardHeader>
-        <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardBody className="p-6 pt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InfoItem label="Email Address" value={vendorData?.email} />
             <InfoItem label="Phone Number" value={vendorData?.mobile} />
             <InfoItem label="Address" value={vendorData?.address} />
@@ -184,152 +183,133 @@ export const UserDetails: React.FC = () => {
         </CardBody>
       </Card>
 
-       {/* Edit Modal */}
-       <Modal
-        isOpen={isEditModalOpen}
+      {/* Edit Details Modal */}
+      <Dialog
+        open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        size="lg"
-        scrollBehavior="inside"
-        backdrop="blur"
-        className="z-50"
-        classNames={{
-          backdrop: "bg-black/50 backdrop-blur-sm",
-          base: "bg-gray-100/80 border-gray-200 rounded-xl",
-        }}
+        fullWidth
+        maxWidth="sm"
+
       >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Edit Details</ModalHeader>
-              <ModalBody>
-                <Input
-                  label="Name"
-                  value={editDetails?.name || ''}
-                  onChange={(e) => setEditDetails({ ...editDetails, name: e.target.value } as IVendor)}
-                />
-                <Input
-                  label="Email"
-                  value={editDetails?.email || ''}
-                  onChange={(e) => setEditDetails({ ...editDetails, email: e.target.value } as IVendor)}
-                />
-                <Input
-                  label="Phone"
-                  value={editDetails?.mobile || ''}
-                  onChange={(e) => setEditDetails({ ...editDetails, mobile: e.target.value } as IVendor)}
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="success" onPress={handleSubmitEditDetails}>
-                  Save Changes
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+        <DialogTitle sx={{ fontWeight: 'bold', pb: 1 }}>Edit Details</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Stack spacing={3}>
+            <TextField
+              label={!editDetails?.name ? 'Name' : undefined}
+              placeholder="Enter name"
+              value={editDetails?.name || ''}
+              fullWidth
+              onChange={(e) =>
+                setEditDetails({ ...editDetails!, name: e.target.value })
+              }
+            />
+            <TextField
+              label={!editDetails?.email ? 'Email' : undefined}
+              placeholder="Enter email"
+              type="email"
+              value={editDetails?.email || ''}
+              fullWidth
+              onChange={(e) =>
+                setEditDetails({ ...editDetails!, email: e.target.value })
+              }
+            />
+            <TextField
+              label={!editDetails?.mobile ? 'Phone' : undefined}
+              placeholder="Enter phone"
+              type="tel"
+              value={editDetails?.mobile || ''}
+              fullWidth
+              onChange={(e) =>
+                setEditDetails({ ...editDetails!, mobile: e.target.value })
+              }
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="text" color="error" onClick={() => setIsEditModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="success" onClick={handleSubmitEditDetails}>
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Address Modal */}
-      <Modal 
-        isOpen={isOpen} 
+      <Dialog
+        open={isOpen}
         onClose={() => setIsOpen(false)}
-        size="lg"
-        scrollBehavior="inside"
-        backdrop="blur"
-        className="z-50"
-        classNames={{
-          backdrop: "bg-black/50 backdrop-blur-sm",
-          base: "bg-gray-100/80 border-gray-200 rounded-xl",
-        }}
+        fullWidth
+        maxWidth="sm"
+
       >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <h2 className="text-xl font-extrabold">Add Address</h2>
-              </ModalHeader>
-              <ModalBody>
-                <div className="grid gap-6">
-                  <div>
-                    <p className="text-sm mb-2 font-bold">House/Street Name</p>
-                    <Input
-                      value={address.house}
-                      onChange={(e) => setAddress({ ...address, house: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter house/street name"
-                    />
-                    {error.house && <p className="text-red-500 text-sm">{error.house}</p>}
-                  </div>
-                  <div>
-                    <p className="text-sm mb-2 font-bold">Post</p>
-                    <Input
-                      value={address.post}
-                      onChange={(e) => setAddress({ ...address, post: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter post"
-                    />
-                    {error.post && <p className="text-red-500 text-sm">{error.post}</p>}
-                  </div>
-                  <div>
-                    <p className="text-sm mb-2 font-bold">City</p>
-                    <Input
-                      value={address.city}
-                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter city"
-                    />
-                    {error.city && <p className="text-red-500 text-sm">{error.city}</p>}
-                  </div>
-                  <div>
-                    <p className="text-sm mb-2 font-bold">Pincode</p>
-                    <Input
-                      value={address.pincode}
-                      onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter pincode"
-                    />
-                    {error.pincode && <p className="text-red-500 text-sm">{error.pincode}</p>}
-                  </div>
-                  <div>
-                    <p className="text-sm mb-2 font-bold">District</p>
-                    <Input
-                      value={address.district}
-                      onChange={(e) => setAddress({ ...address, district: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter district"
-                    />
-                    {error.district && <p className="text-red-500 text-sm">{error.district}</p>}
-                  </div>
-                  <div>
-                    <p className="text-sm mb-2 font-bold">State</p>
-                    <Input
-                      value={address.state}
-                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                      variant="bordered"
-                      placeholder="Enter state"
-                    />
-                    {error.state && <p className="text-red-500 text-sm">{error.state}</p>}
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" className="font-extrabold" variant="light" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button 
-                  color="success" 
-                  className="rounded-xl text-white font-extrabold px-3"
-                  onPress={handleAddAddress}
-                >
-                  Add Address
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+        <DialogTitle sx={{ fontWeight: 'bold', pb: 1 }}>Add Address</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Stack spacing={3}>
+            <TextField
+              label="House/Street Name"
+              placeholder="Enter house/street name"
+              value={address.house}
+              onChange={(e) => setAddress({ ...address, house: e.target.value })}
+              error={!!error.house}
+              helperText={error.house}
+            />
+            <TextField
+              label="Post"
+              placeholder="Enter post"
+              value={address.post}
+              onChange={(e) => setAddress({ ...address, post: e.target.value })}
+              error={!!error.post}
+              helperText={error.post}
+            />
+            <TextField
+              label="City"
+              placeholder="Enter city"
+              value={address.city}
+              onChange={(e) => setAddress({ ...address, city: e.target.value })}
+              error={!!error.city}
+              helperText={error.city}
+            />
+            <TextField
+              label="Pincode"
+              placeholder="Enter pincode"
+              value={address.pincode}
+              onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
+              error={!!error.pincode}
+              helperText={error.pincode}
+            />
+            <TextField
+              label="District"
+              placeholder="Enter district"
+              value={address.district}
+              onChange={(e) => setAddress({ ...address, district: e.target.value })}
+              error={!!error.district}
+              helperText={error.district}
+            />
+            <TextField
+              label="State"
+              placeholder="Enter state"
+              value={address.state}
+              onChange={(e) => setAddress({ ...address, state: e.target.value })}
+              error={!!error.state}
+              helperText={error.state}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="text" color="error" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            sx={{ fontWeight: 'bold', borderRadius: 2, px: 3 }}
+            onClick={handleAddAddress}
+          >
+            Add Address
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

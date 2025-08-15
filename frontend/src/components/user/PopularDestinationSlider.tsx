@@ -3,6 +3,7 @@ import { useRef } from "react";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
+
 interface Trip {
     _id: string;
     venue: string;
@@ -21,6 +22,9 @@ interface UniquePopularVenue {
 interface Props {
     trips: Trip[];
 }
+
+
+
 
 const settings = {
     className: "center",
@@ -102,6 +106,7 @@ const PopularDestinationSlider: React.FC<Props> = ({ trips }) => {
                         {uniquePopularVenues.map(venu => (
                             <div
                                 key={venu._id}
+                                
                                 className="relative h-[300px] flex items-center justify-center rounded-lg border border-gray-200 overflow-hidden group hover:cursor-pointer   "
                             >
                                 <img

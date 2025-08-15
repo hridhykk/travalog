@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { User, Tag, ShieldCheck } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import FilterSearch from "./FilterSearch";
+import StarIcon from '@mui/icons-material/Star';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 interface Trip {
   _id: string;
   venue: string;
-  price: string;    
+  price: string;
   images: string[];
   duration: string;
+  packageName: string;
+  popularity: number;
+  PackageType: string;
 }
 
 interface TripResponse {
@@ -16,11 +21,16 @@ interface TripResponse {
   data: Trip[];
 }
 
+
+
+
 const PopularTrips: React.FC = () => {
+
   const [trips, setTrips] = useState<Trip[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,78 +62,31 @@ const PopularTrips: React.FC = () => {
   }
   const handleDetailsClick = (id: string) => {
     console.log(id);
-   
+
     navigate(`/user/packagedetails/${id}`); // Add a leading slash
   };
 
 
-  
+
+
+
   return (
     <section>
+      <div className="h-16" />
       {/* Search Banner */}
-      <div
-        className="relative bg-cover bg-center w-full h-[500px] flex flex-col justify-center items-center text-white"
-        style={{
-          backgroundImage: "url('/img4.jpeg')",
-        }}
-      >
-        {/* Black Overlay */}
-        <div className="absolute inset-0 bg-black opacity-40"></div>
-
-        {/* Content */}
-        <h1 className="relative z-10 text-4xl font-extrabold mb-4 text-center drop-shadow-md">
-          Search Your Favorite Destinations Worldwide!
-        </h1>
-        <div className="relative z-10 w-full max-w-md">
-          <div className="flex">
-            <input
-              type="text"
-              placeholder="Search destinations..."
-              className="flex-1 px-4 py-2 rounded-l-md focus:outline-none text-black"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700">
-              Search
-            </button>
-          </div>
-        </div>
+      <div className="relative">
+        <FilterSearch trips={trips} />
       </div>
+      <div className="container-flex mx-auto h-36 md:h-20" />
 
-      <div className="container-flex mx-auto h-72">
-        <div className="grid grid-cols-1 bg-gray-100 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-200">
-          <div className="flex flex-col container-flex h-34 items-center justify-center p-8 text-center">
-            <div className="bg-gray-200 rounded-full p-4 mb-4">
-              <User size={32} className="text-gray-700" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Handpicked Activities</h3>
-            <p className="text-gray-600">Explore the best experiences<br /> in your favourite cities</p>
-          </div>
 
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="bg-gray-200 rounded-full p-4 mb-4">
-              <Tag size={32} className="text-gray-700" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Lowest Prices</h3>
-            <p className="text-gray-600">Guaranteed lowest prices.<br /> Anyday, everyday.</p>
-          </div>
-
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="bg-gray-200 rounded-full p-4 mb-4">
-              <ShieldCheck size={32} className="text-gray-700" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">100% Secure</h3>
-            <p className="text-gray-600">Every transaction is secure.<br /> Your money is safe</p>
-          </div>
-        </div>
-      </div>
 
       {/* Spacing between background and Popular Trips */}
-      <div className="mt-8 bg-gray-100 py-10">
+      <div className="mt-8  py-10">
         <div className="container mx-auto px-4">
           {/* Popular Trips Heading */}
           <h1 className="text-4xl font-extrabold font-serif bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent mb-8 text-center">
-            Popular Trips
+            Discover Your package
           </h1>
 
           {filteredTrips.length === 0 ? (
@@ -131,47 +94,36 @@ const PopularTrips: React.FC = () => {
               No trips found matching your search.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {filteredTrips.slice(0, 9).map((trip) => (
-                
-                <div
-                key={trip._id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300"
-              >
-                  {/* Display two images and toggle between them */}
-                  <div className="relative">
-                {trip.images && trip.images.length > 1 ? (
-  <ImageToggle images={trip.images} />
-) : trip.images && trip.images.length === 1 && trip.images[0] ? (
-  <img
-    src={
-      trip.images[0].includes("/uploadimages/")
-        ? decodeURIComponent(trip.images[0].split("/uploadimages/")[1])
-        : trip.images[0]
-    }
-    alt={trip.venue}
-    className="h-56 w-full object-cover"
-    onError={(e) => {
-      e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
-    }}
-  />
-) : (
-  <div className="h-56 w-full bg-gray-300 flex justify-center items-center">
-    <span className="text-white text-xl">No Image</span>
-  </div>
-)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredTrips.slice(0, 11).map((trip) => (
 
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-900">{trip.venue}</h3>
-                    <p className="text-gray-600 mb-4">Price: {trip.price}</p>
-                    <button
-                      className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors"
-                      onClick={() => handleDetailsClick(trip._id)} // Handle the button click
-                    >
-
-                      Show Details
-                    </button>
+                <div className="p-2 transition-transform hover:scale-105 duration-300 hover:cursor-pointer" onClick={() => handleDetailsClick(trip._id)} key={trip._id}>
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden transition-shadow duration-300 h-full flex flex-col">
+                    <div className="relative h-[200px] w-full">
+                      <img
+                        src={trip.images[1] || "/placeholder.jpg"}
+                        onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 flex items-center gap-x-1 bg-white bg-opacity-80 px-2 py-1 rounded shadow text-sm">
+                        <span className="font-medium">Rating:</span>
+                        <span className="font-semibold">4.5</span>
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                      </div>
+                    </div>
+                    <div className="p-4 flex flex-col flex-1">
+                      <h2 className="text-lg font-bold mb-1">{trip.packageName}</h2>
+                      <p className="text-gray-600 mb-2">{trip.venue}</p>
+                      <p className="text-gray-600 mb-2">{trip.PackageType
+                      }</p>
+                      <div className="flex justify-between items-center mt-auto">
+                        <span className="text-blue-600 font-semibold">₹{trip.price}</span>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <AccessTimeIcon className="w-4 h-4" fontSize="small" />
+                          {trip.duration}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

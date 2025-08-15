@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { logout } from "../../../features/vendor/vendorSlice";
+import { logout } from "../../../features/user/userSlice";
 
 const commonHeader2 = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,7 +39,7 @@ const commonHeader2 = () => {
         "text-black/90 hover:text-black border-black/30 hover:border-black/50";
 
     return (
-        <header className="fixed w-full z-50 bg-white text-black shadow-md transition-all duration-300">
+        <header className="fixed w-full z-[1100] bg-white text-black shadow-md transition-all duration-300">
             <nav className="px-6 sm:px-8 py-3">
                 <div className="flex items-center justify-between">
                     {/* Logo */}

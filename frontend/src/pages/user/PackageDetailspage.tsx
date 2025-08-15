@@ -1,4 +1,4 @@
-import Header from '../../components/user/common/commonHeader';
+import Header from '../../components/user/common/commonHeader2';
 import Footer from '../../components/user/common/Footer';
 import PackageDetailsPage from '../../components/user/PackageDetails';
 

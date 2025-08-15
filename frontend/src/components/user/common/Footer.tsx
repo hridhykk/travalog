@@ -1,6 +1,10 @@
+import FacebookIcon from '@mui/icons-material/Facebook';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import InstagramIcon from '@mui/icons-material/Instagram';
+
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-8">
+    <footer className="bg-gray-800 text-white py-8 relative" style={{ zIndex: 1500 }} >
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
@@ -34,19 +38,15 @@ const Footer = () => {
               <p>Phone: +1 234 567 890</p>
               <p>Address: 123 Travel Street, Adventure City</p>
             </div>
-            <div className="mt-4 flex justify-center md:justify-start space-x-4">
-              {/* Social Media Icons */}
+            <div className="mt-4 flex justify-center items-end md:justify-end space-x-4">
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <span className="sr-only">Facebook</span>
-                □
+                <FacebookIcon />
               </a>
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
-                □
+                <TwitterIcon />
               </a>
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <span className="sr-only">Instagram</span>
-                □
+                <InstagramIcon />
               </a>
             </div>
           </div>
