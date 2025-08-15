@@ -16,7 +16,7 @@ export const SidebarNav = () => {
     { label: 'Settings', icon: <Settings className="w-5 h-5" />, path: '/settings' }
   ];
 
-  const handleNavigation = (path) => {
+  const handleNavigation = (path:any) => {
     setCurrentPath(path);
     // Add your navigation logic here
     window.location.href = path;

@@ -7,6 +7,7 @@ const ReviewSchema: Schema = new Schema<IReview>({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   rating: { type: Number, required: true, min: 1, max: 5 },
   comment: { type: String, required: true },
+   images: { type: [String], required: true },
 }, { timestamps: true });
 
 

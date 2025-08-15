@@ -1,70 +1,67 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../../features/user/userSlice';
-import { useNavigate } from 'react-router-dom';
-import { image } from '@nextui-org/react';
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { useDispatch } from "react-redux";
 
-
+import {logout} from "../../../features/user/userSlice"
 export const Header = () => {
   const [showHeader, setShowHeader] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  useEffect(() => {
-    const handleScroll = () => {
-
-      setShowHeader(window.scrollY > 100);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  const location = useLocation();
 
   const menuItems = [
-    { label: 'HOME', href: '/user' },
-    { label: 'TRIPS', href: '/user/trips' },
-    { label: 'ACCOUNT', href: '/user/profile' },
-    { label: 'ABOUT US', href: '/about' }
+    { label: "HOME", href: "/user" },
+    { label: "TRIPS", href: "/user/trips" },
+    { label: "ACCOUNT", href: "/user/profile" },
+    { label: "ABOUT US", href: "/about" },
   ];
+
+  useEffect(() => {
+    const handleScroll = () => setShowHeader(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/user');
+    navigate("/user");
     setIsMenuOpen(false);
   };
-  const location = useLocation();
 
   const getLinkClass = (path: string): string => {
     const isActive = location.pathname === path;
-    const txt = showHeader ? "text-black" : "text-white";
+    const baseColor = showHeader ? "text-black" : "text-white";
     const activeBorder = showHeader ? "border-black" : "border-white";
-    const hoverBorder = showHeader ? "hover:border-balck" : "hover:border-white";
-    return `${txt} no-underline ${isActive
-      ? `border-b-2 ${activeBorder} pb-1`
-      : `hover:border-b-2 ${hoverBorder} hover:pb-1 transition-all duration-100`
-      }`;
+    const hoverBorder = showHeader ? "hover:border-black" : "hover:border-white";
+
+    return `${baseColor} no-underline ${
+      isActive
+        ? `border-b-2 ${activeBorder} pb-1`
+        : `hover:border-b-2 ${hoverBorder} hover:pb-1 transition-all duration-100`
+    }`;
   };
 
   const logoutBtnClass = showHeader
     ? "text-black/90 hover:text-black border-black/30 hover:border-black/50"
     : "text-white/90 hover:text-white border-white/30 hover:border-white/50";
 
-
   return (
     <header
-      className={`fixed w-full  z-50 transition-colors duration-300 ${showHeader ? 'bg-white text-black' : 'bg-transparent'
-        }`}
+      className={`fixed w-full z-50 transition-all duration-z  ${
+        showHeader ? "bg-white text-black shadow-md" : "bg-transparent text-white"
+      }`}
     >
-      <nav className="container mx-auto px-8 py-1">
+      <nav className=" px-6 sm:px-8 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="flex flex-col">
-              {showHeader ? <img className= 'w-24 sm:w-36' src="/logoblack.png" alt="Logoblack" /> : <img className='w-24 sm:w-36' src="/logo.png" />}
-
-            </div>
+          {/* Logo */}
+          <div className="flex items-center">
+            <img
+              className="w-24 sm:w-36"
+              src={showHeader ? "/logoblack.png" : "/logo.png"}
+              alt="Logo"
+            />
           </div>
 
           {/* Desktop Menu */}
@@ -86,43 +83,34 @@ export const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Controls */}
+          {/* Mobile Hamburger */}
           <div className="md:hidden">
             <button
-              className="text-white/90 hover:text-white transition-colors duration-300"
+              className="transition-colors duration-300"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? (
-                <div className="flex flex-col gap-1">
-                  <div className="w-6 h-0.5 bg-white"></div>
-                  <div className="w-6 h-0.5 bg-white"></div>
-                  <div className="w-6 h-0.5 bg-white"></div>
-                </div>
-              ) : (
-                <Menu size={24} />
-              )}
+              {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu Overlay */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute left-0 top-full w-full bg-black/20 backdrop-blur-lg">
-            <div className="flex flex-col py-6 px-8">
+          <div className="md:hidden absolute left-0 top-full w-full bg-black/70 backdrop-blur-md shadow-lg">
+            <div className="flex flex-col py-6 px-8 space-y-4">
               {menuItems.map((item) => (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
-                  className="text-white/90 hover:text-white text-lg font-medium py-3
-                           transition-colors duration-300 no-underline"
+                  to={item.href}
+                  className="text-white text-lg font-medium no-underline hover:text-blue-300 transition"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <button
                 onClick={handleLogout}
-                className={`text-sm font-medium transition-all duration-300 px-6 py-2 rounded-full border ${logoutBtnClass}`}
+                className={`mt-3 text-sm font-medium text-white transition-all duration-300 px-6 py-2 rounded-full border ${logoutBtnClass}`}
               >
                 LOGOUT
               </button>

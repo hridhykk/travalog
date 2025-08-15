@@ -27,7 +27,7 @@ const PackageSchema: Schema = new Schema<IPackage>(
     maxDuration:{type:Number,required:true},
     PackageType:{type:String,required:true},
    averageRating: { type: Number, default: 0 },
-totalReviews: { type: Number, default: 0 },
+    totalReviews: { type: Number, default: 0 },
     isBlocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     maxPackagesPerDay: { type: Number, required: true, default: 4 },

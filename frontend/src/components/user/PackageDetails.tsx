@@ -39,6 +39,8 @@ const PackageDetailsPage: React.FC = () => {
           `http://localhost:5000/vendor/fetchpackage`,
           { params: { id } }
         );
+
+        
         setPackageData(response.data.data);
         setLoading(false);
       } catch (err) {
@@ -85,17 +87,18 @@ const PackageDetailsPage: React.FC = () => {
     <div className="bg-gray-50 py-10">
       <div className="container mx-auto px-6 md:px-12">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Render the single image */}
-          <div className="relative">
+       
+
+       <div className="relative">
   {packageData.images.length > 0 ? (
-  <img
-  src={decodeURIComponent(packageData.images[0].split("/uploadimages/")[1])}
-  alt={packageData.packageName}
-  className="w-full h-80 object-cover rounded-t-lg"
-  onError={(e) => {
-    e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
-  }}
-/>
+    <img
+      src={packageData.images[0]} // Use the direct Cloudinary URL
+      alt={packageData.packageName}
+      className="w-full h-80 object-cover rounded-t-lg"
+      onError={(e) => {
+        e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
+      }}
+    />
   ) : (
     <div className="w-full h-80 bg-gray-300 flex justify-center items-center">
       <span className="text-white text-xl">No Image Available</span>
@@ -105,6 +108,19 @@ const PackageDetailsPage: React.FC = () => {
     <h1 className="text-white text-4xl font-semibold">{packageData.packageName}</h1>
   </div>
 </div>
+        {/* <div className="flex overflow-x-auto space-x-4 py-4">
+  {packageData.images.map((imgUrl, idx) => (
+    <img
+      key={idx}
+      src={imgUrl}
+      alt={`Package Image ${idx + 1}`}
+      className="h-40 rounded shadow"
+      onError={(e) => {
+        e.currentTarget.src = "https://via.placeholder.com/800x600?text=No+Image+Available";
+      }}
+    />
+  ))}
+</div> */}
 
 
 

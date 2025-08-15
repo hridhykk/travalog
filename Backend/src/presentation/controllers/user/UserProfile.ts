@@ -115,12 +115,15 @@ userReview = async (
   try {
     console.log(req.body);
 
+    
     const review: IReview = {
       userId: req.body.userId as string,
       packageId: req.body.packageId as string,
       vendorId: req.body.vendorId as string,
       rating: Number(req.body.rating),
       comment: req.body.comment as string,
+     images: Array.isArray(req.body.images) ? req.body.images : [],
+
     };
 
     console.log("Parsed Review:", review);

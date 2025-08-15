@@ -113,7 +113,7 @@ export class UserReviewUseCase{
 
       const reviewcreated = await this.reviewRepository.create(review);
       return {
-        status:'suucess',
+        status:'success',
         message:'review created successfully',
         review:reviewcreated
       }
@@ -126,3 +126,4 @@ export class UserReviewUseCase{
     }
   }
 }
+

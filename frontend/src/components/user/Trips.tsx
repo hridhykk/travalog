@@ -6,9 +6,14 @@ import { useNavigate } from "react-router-dom";
 interface Trip {
   _id: string;
   venue: string;
-  price: string;
+  price: string;    
   images: string[];
   duration: string;
+}
+
+interface TripResponse {
+  status: string;
+  data: Trip[];
 }
 
 const PopularTrips: React.FC = () => {
@@ -22,7 +27,7 @@ const PopularTrips: React.FC = () => {
     const fetchTrips = async () => {
       try {
         setLoading(true);
-        const response = await axios.get<Trip[]>("http://localhost:5000/vendor/fetchallpackages");
+        const response = await axios.get<TripResponse>("http://localhost:5000/vendor/fetchallpackages");
         setTrips(response.data.data);
         setLoading(false);
       } catch (error) {

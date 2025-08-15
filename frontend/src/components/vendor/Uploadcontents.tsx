@@ -26,9 +26,9 @@ const TravelPackageForm: React.FC = () => {
 
   type Base64Image = string;
 
-const [base64Images, setBase64Images] = useState<Base64Image[]>([]);
+
   const vendorId = useSelector((state: RootState) => state.vendor.vendor?._id);
-  const [images, setImages] = useState<File[]>([]);
+  
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 const [imageURLs, setImageURLs] = useState<string[]>([]); 
@@ -71,6 +71,7 @@ const [imageURLs, setImageURLs] = useState<string[]>([]);
     'Family Trip',
     'Honeymoon Trip',
     'Couple-Friendly Trip',
+    'Luxury Trip'
   ];
 
   // Handle image upload
@@ -84,7 +85,7 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const results = await Promise.all(uploads); // Cloudinary URLs
     setImageURLs((prev) => [...prev, ...results]);
     setImagePreviews((prev) => [...prev, ...results]); // Previews from Cloudinary URLs only
-    alert('Images uploaded successfully!', results);
+    alert('Images uploaded successfully!');
   } catch (err) {
     console.error("Image upload error:", err);
   }

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { RegisterPackageUseCase, FetchPackageUseCase,UpdateSlotUseCase,FetchAllPackagesUseCase,FetchPackageDetailsUseCase, CheckavailabilityUseCase ,DeletePackageUseCase,UpdatePackageUseCase  } from '../../../application/use-case/vendor/vendorPackage';
+import { RegisterPackageUseCase, FetchPackageUseCase, UpdateSlotUseCase, FetchAllPackagesUseCase, FetchPackageDetailsUseCase, CheckavailabilityUseCase, DeletePackageUseCase, UpdatePackageUseCase } from '../../../application/use-case/vendor/vendorPackage';
 import { PackageRepository } from "../../../infrastructure/repositories/PackageRepository";
 import { IPackage } from "../../../domain/entities/packageentities";
 import path from 'path';
@@ -10,22 +10,22 @@ import cloudinary from "../../../utils/cloudinary";
 export class VendorPackageController {
   private registerPackageUseCase: RegisterPackageUseCase;
   private fetchPackageUsecase: FetchPackageUseCase;
-private updateSlotUseCase :UpdateSlotUseCase
-private fetchAllPackageUseCase :FetchAllPackagesUseCase
-private fetchPackageDetailsUseCase:FetchPackageDetailsUseCase
-private checkavailabilityUseCase :CheckavailabilityUseCase 
-private  deletePackageUseCase: DeletePackageUseCase;
-private updatePackageUseCase:UpdatePackageUseCase
+  private updateSlotUseCase: UpdateSlotUseCase
+  private fetchAllPackageUseCase: FetchAllPackagesUseCase
+  private fetchPackageDetailsUseCase: FetchPackageDetailsUseCase
+  private checkavailabilityUseCase: CheckavailabilityUseCase
+  private deletePackageUseCase: DeletePackageUseCase;
+  private updatePackageUseCase: UpdatePackageUseCase
   constructor() {
     const packageRepository = new PackageRepository();
     this.registerPackageUseCase = new RegisterPackageUseCase(packageRepository);
     this.fetchPackageUsecase = new FetchPackageUseCase(packageRepository);
     this.updateSlotUseCase = new UpdateSlotUseCase(packageRepository);
     this.fetchAllPackageUseCase = new FetchAllPackagesUseCase(packageRepository)
-    this.fetchPackageDetailsUseCase =new FetchPackageDetailsUseCase(packageRepository)
-    this.checkavailabilityUseCase  = new CheckavailabilityUseCase (packageRepository);
-    this.deletePackageUseCase  = new DeletePackageUseCase (packageRepository)
-  this.updatePackageUseCase = new UpdatePackageUseCase(packageRepository)
+    this.fetchPackageDetailsUseCase = new FetchPackageDetailsUseCase(packageRepository)
+    this.checkavailabilityUseCase = new CheckavailabilityUseCase(packageRepository);
+    this.deletePackageUseCase = new DeletePackageUseCase(packageRepository)
+    this.updatePackageUseCase = new UpdatePackageUseCase(packageRepository)
   }
 
 
@@ -59,6 +59,7 @@ private updatePackageUseCase:UpdatePackageUseCase
     };
 
     const result = await this.registerPackageUseCase.execute(packageData);
+ 
 
     if (result.status === 'success') {
       res.status(201).json(result);
@@ -113,13 +114,13 @@ fetchPackagesWithPagination = async (req: Request, res: Response, next: NextFunc
   updateSlot =async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
  try{
 
-  const { packageId, date, maximumAllowedPackages } = req.body;
-console.log(req.body)
+      const { packageId, date, maximumAllowedPackages } = req.body;
+      console.log(req.body)
       if (!packageId || !date || maximumAllowedPackages === undefined) {
         res.status(400).json({ error: "Missing required fields." });
         return;
       }
-console.log(req.body)
+      console.log(req.body)
       const updatedPackage = await this.updateSlotUseCase.updateSlot(
         packageId,
         date,
@@ -128,20 +129,20 @@ console.log(req.body)
 
       res.status(200).json({ success: true, data: updatedPackage });
 
- }catch(error){
-  console.error('Error fetching packages:', error);
-  res.status(500).json({ status: 'error', message: 'Internal server error' });
- }
+    } catch (error) {
+      console.error('Error fetching packages:', error);
+      res.status(500).json({ status: 'error', message: 'Internal server error' });
+    }
   }
 
 
-  fetchallpackages = async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-    try{
+  fetchallpackages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
 
-   console.log('fetch all packages ')
-   const result = await this.fetchAllPackageUseCase.execute();
+      console.log('fetch all packages ')
+      const result = await this.fetchAllPackageUseCase.execute();
 
-   const packages = result.data;
+      const packages = result.data;
 
       
    res.status(result?.status === 'success' ? 200 : 401).json({ 
@@ -150,7 +151,7 @@ console.log(req.body)
     data:packages
   });
 
-    }catch(error){
+    } catch (error) {
       console.error('Error fetching packages:', error);
       res.status(500).json({ status: 'error', message: 'Internal server error' });
     }
@@ -161,51 +162,36 @@ console.log(req.body)
   fetchpackage=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
    try{
 
-    const id = req.query.id as string;
-    // console.log(id);
+      const id = req.query.id as string;
+      // console.log(id);
 
-    const result = await this.fetchPackageDetailsUseCase.execute(id)
-    const packageData = result.data; // Assuming this is an array of packages
-    
+      const result = await this.fetchPackageDetailsUseCase.execute(id)
+      const packageData = result.data; // Assuming this is an array of packages
+
 
       if (!packageData || packageData.length === 0) {
-         res.status(404).json({
+        res.status(404).json({
           status: "error",
           message: "No packages found for the provided ID.",
         });
       }
 
-      const s3Client = new S3Client({ region: process.env.AWS_REGION });
-
-      // Map through packages to fetch signed URLs for images
-      packageData.images = await Promise.all(
-        packageData.images.map(async (imageKey: string) => {
-          if (imageKey) {
-            const command = new GetObjectCommand({
-              Bucket: process.env.S3_BUCKET_NAME!,
-              Key: `travalog/vendor/uploadimages/${imageKey}`, // Ensure the path matches your S3 structure
-            });
-            return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-          }
-          return null; // Return null for empty image keys
-        })
-      );
-  
-      // console.log("Package with Signed URLs:", packageData);
-      // Send the final response with resolved image URLs
       res.status(200).json({
         status: "success",
         message: "Package details fetched successfully",
         data: packageData,
       });
 
-    
-   }catch(error){
 
-   }
+    } catch (error) {
+   res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+      });
+    }
   }
 
-   checkAvailability=async(req: Request, res: Response): Promise<void>=> {
+  checkAvailability = async (req: Request, res: Response): Promise<void> => {
     console.log(req.body)
     const { packageId, date, numPeople } = req.body;
 
@@ -222,10 +208,10 @@ console.log(req.body)
       const result = await this.checkavailabilityUseCase.execute(packageId, date, numPeople);
 
       // Send the result back to the frontend
-      res.status(200).json({ 
+      res.status(200).json({
         status: result?.status,
         message: result?.message,
-        
+
       });
     } catch (error) {
       console.error('Error in checkAvailability controller:', error);
@@ -239,16 +225,16 @@ console.log(req.body)
 
 
 
- deletePackage=  async(req: Request, res: Response, next: NextFunction): Promise<void>=> {
-     // Assuming package ID is passed in the URL as a parameter
-     const packageId = req.query.packageId as string;
-console.log('the iddd' ,packageId)
+  deletePackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // Assuming package ID is passed in the URL as a parameter
+    const packageId = req.query.packageId as string;
+    console.log('the iddd', packageId)
     try {
-    const result = await this.deletePackageUseCase.execute(packageId);
-    res.status(200).json({
-      status:result.status,
-      message:result.message
-    })
+      const result = await this.deletePackageUseCase.execute(packageId);
+      res.status(200).json({
+        status: result.status,
+        message: result.message
+      })
     } catch (error) {
       // Handle unexpected errors
       console.error('Error in deletePackage controller:', error);
@@ -262,20 +248,20 @@ console.log('the iddd' ,packageId)
 
 
 
-  updatepackage =async(req: Request, res: Response, next: NextFunction): Promise<void>=> {
-    try{
+  updatepackage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
 
       console.log(req.body)
-     
-   
-      const packageData = req.body;  
+
+
+      const packageData = req.body;
       const packageId = packageData._id
       console.log(packageData._id);
       if (!packageId) {
         res.status(400).json({ error: "Package ID is required" });
       }
 
-      
+
       const updatedPackage = await this.updatePackageUseCase.execute(packageId, packageData);
 
       if (!updatedPackage) {
@@ -286,7 +272,7 @@ console.log('the iddd' ,packageId)
         message: "Package updated successfully",
         data: updatedPackage,
       });
-    }catch (error) {
+    } catch (error) {
       // Handle unexpected errors
       console.error('Error in deletePackage controller:', error);
       res.status(500).json({
@@ -295,6 +281,7 @@ console.log('the iddd' ,packageId)
       });
     }
   }
-    
+
 
 }
+ 

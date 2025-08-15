@@ -29,5 +29,6 @@ router.get('/fetchbookingdetails',userAccountController.fetchbookingdetails);
 router.get('/cancelBooking',userAccountController.CancelBooking)
 router.post('/add-review',userAccountController.userReview );
 router.get('/packages',userHomeController.fetchPackages);
+router.get('/allreviews',userHomeController.fetchAllReviews);
 // router.get('/fetchuserwallet',userAccountController.fetchUserWallet);
 export default router;

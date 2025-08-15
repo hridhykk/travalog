@@ -6,7 +6,7 @@ import { Button, Card, Input, Textarea } from '@nextui-org/react';
 import axios from 'axios';
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
 const MySwal = withReactContent(Swal);
 
 type BookingData = {
@@ -33,6 +33,8 @@ const BookingDetails: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [submittingReviewFor, setSubmittingReviewFor] = useState<string | null>(null);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+const [imageURLs, setImageURLs] = useState<string[]>([]); 
 
   useEffect(() => {
     fetchBookingDetails();
@@ -94,6 +96,23 @@ const BookingDetails: React.FC = () => {
     });
   };
 
+  // Handle image upload
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (!files) return;
+
+  const uploads = Array.from(files).map((file) => uploadToCloudinary(file));
+
+  try {
+    const results = await Promise.all(uploads); // Cloudinary URLs
+    setImageURLs((prev) => [...prev, ...results]);
+    setImagePreviews((prev) => [...prev, ...results]); // Previews from Cloudinary URLs only
+    alert('Images uploaded successfully!');
+  } catch (err) {
+    console.error("Image upload error:", err);
+  }
+};
+
   const handleReviewSubmit = async (booking: BookingData) => {
     if (rating < 1 || rating > 5 || !reviewText.trim()) {
       toast.error("Please enter a rating (1-5) and a review.");
@@ -108,7 +127,8 @@ const BookingDetails: React.FC = () => {
         packageId: booking.packageId,
         vendorId: booking.vendorId, 
         rating,
-        comment: reviewText
+        comment: reviewText,
+        images: imageURLs,
       };
 
       const response = await axios.post('http://localhost:5000/user/add-review', payload);
@@ -195,6 +215,35 @@ const BookingDetails: React.FC = () => {
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
                       />
+                       <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Upload Package Images (Max 3)</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <div className="grid grid-cols-3 gap-2 mt-2">
+            {imagePreviews.map((preview, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={preview}
+                  alt={`Preview ${index + 1}`}
+                  className="w-full h-20 object-cover rounded"
+                />
+                {/* <button
+                  type="button"
+                  onClick={() => handleImageDelete(index)}
+                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                >
+                  &times;
+                </button> */}
+              </div>
+            ))}
+          </div>
+        </div>
+
                     </div>
                     <Button
                       className="mt-4"
